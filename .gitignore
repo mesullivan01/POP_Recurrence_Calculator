@@ -206,5 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Local data files (entire directory tree)
-data/
+# Local data files (ignore contents; exception for IRB protocol transcript)
+data/*
+!data/protocol.md
