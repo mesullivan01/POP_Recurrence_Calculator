@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POP-PREDICT Score — Prolapse Recurrence Risk Calculator</title>
+  <style>
+    :root {
+      --teal-50:    #E1F5EE;
+      --teal-100:   #9FE1CB;
+      --teal-400:   #1D9E75;
+      --teal-600:   #0F6E56;
+      --green-bg:   #C6EFCE;
+      --green-fg:   #375623;
+      --green-mid:  #70AD47;
+      --yellow-bg:  #FFEB9C;
+      --yellow-fg:  #7D4F00;
+      --yellow-mid: #FFC000;
+      --red-bg:     #FFC7CE;
+      --red-fg:     #9C0006;
+      --red-mid:    #FF0000;
+      --gray-50:    #F8F7F4;
+      --gray-100:   #EDECE8;
+      --gray-200:   #D3D1C7;
+      --gray-400:   #888780;
+      --gray-600:   #5F5E5A;
+      --gray-900:   #2C2C2A;
+      --font:       'Georgia', serif;
+      --font-sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page { max-width: 680px; margin: 0 auto; }
+
+    /* ---- Header ---- */
+    .header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+      padding: 2rem 1.5rem 1.5rem;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--gray-200);
+    }
+    .header-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--teal-600);
+      background: var(--teal-50);
+      border: 1px solid var(--teal-100);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 0.9rem;
+    }
+    .header h1 {
+      font-family: var(--font);
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: -0.5px;
+      color: var(--gray-900);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .header p { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+
+    /* ---- Section label ---- */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin: 1.5rem 0 0.5rem;
+      padding-left: 2px;
+    }
+
+    /* ---- Factor card ---- */
+    .factor-card {
+      background: white;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 13px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .factor-card:hover {
+      border-color: var(--teal-100);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    }
+    .factor-left  { flex: 1; min-width: 0; }
+    .factor-name  { font-size: 14px; font-weight: 600; color: var(--gray-900); }
+    .factor-hint  { font-size: 11.5px; color: var(--gray-400); margin-top: 2px; }
+    .factor-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .pts-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--teal-600);
+      background: var(--teal-50);
+      border: 1px solid var(--teal-100);
+      border-radius: 20px;
+      padding: 3px 9px;
+      min-width: 50px;
+      text-align: center;
+      transition: background 0.2s, color 0.2s;
+    }
+    .factor-select {
+      font-size: 13px;
+      font-family: var(--font-sans);
+      color: var(--gray-900);
+      background: var(--gray-50);
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 6px 28px 6px 10px;
+      min-width: 215px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .factor-select:focus {
+      outline: none;
+      border-color: var(--teal-400);
+      box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+    }
+
+    /* ---- Score panel ---- */
+    .score-section {
+      background: white;
+      border: 2px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      transition: border-color 0.35s;
+    }
+    .score-top {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.1rem;
+    }
+    .score-num-block { flex-shrink: 0; text-align: center; min-width: 80px; }
+    .score-big {
+      font-size: 62px;
+      font-weight: 300;
+      font-family: var(--font);
+      line-height: 1;
+      transition: color 0.35s;
+      display: block;
+    }
+    .score-denom { font-size: 14px; color: var(--gray-400); }
+    .score-right { flex: 1; }
+
+    .risk-pct-large {
+      font-size: 36px;
+      font-weight: 700;
+      font-family: var(--font);
+      line-height: 1;
+      transition: color 0.35s;
+    }
+    .risk-pct-label {
+      font-size: 13px;
+      color: var(--gray-600);
+      margin-top: 3px;
+    }
+    .risk-ci {
+      font-size: 11px;
+      color: var(--gray-400);
+      margin-top: 3px;
+    }
+    .risk-tier-badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: 20px;
+      padding: 3px 12px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ---- Progress bar ---- */
+    .bar-track {
+      height: 8px;
+      background: var(--gray-100);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 5px;
+      margin-top: 0.75rem;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1), background 0.4s;
+    }
+
+    /* ---- Score breakdown ---- */
+    .breakdown {
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4px 16px;
+    }
+    .bk-label { font-size: 12px; color: var(--gray-600); }
+    .bk-val   { font-size: 12px; font-weight: 600; color: var(--gray-900); text-align: right; }
+    .bk-divider { grid-column: 1 / -1; height: 1px; background: var(--gray-200); margin: 3px 0; }
+    .bk-total-label { font-size: 12px; font-weight: 700; color: var(--gray-900); }
+    .bk-total-val   { font-size: 12px; font-weight: 700; color: var(--gray-900); text-align: right; }
+
+    /* ---- Tier cards ---- */
+    .strata-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 1.5rem;
+    }
+    .strat {
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      transition: background 0.25s, border-color 0.25s, transform 0.15s, box-shadow 0.15s;
+    }
+    .strat.active {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+    }
+    .strat-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .strat-range {
+      font-size: 22px;
+      font-weight: 300;
+      font-family: var(--font);
+      line-height: 1.1;
+    }
+    .strat-unit {
+      font-size: 11px;
+      margin-top: 4px;
+      opacity: 0.75;
+    }
+
+    @media (max-width: 380px) {
+      .strata-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ---- Disclaimer ---- */
+    .disclaimer {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: #FFFBF0;
+      border: 1px solid #FAC775;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #633806;
+      line-height: 1.6;
+    }
+    .disclaimer strong { font-weight: 600; }
+
+    /* ---- Footer ---- */
+    .footer {
+      margin-top: 1.25rem;
+      font-size: 11px;
+      color: var(--gray-400);
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    @media (max-width: 520px) {
+      .factor-card   { flex-direction: column; align-items: flex-start; }
+      .factor-right  { width: 100%; }
+      .factor-select { min-width: 100%; width: 100%; }
+      .score-big     { font-size: 48px; }
+      .risk-pct-large { font-size: 28px; }
+      .pts-badge     { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">Clinical Decision Tool</div>
+    <h1>POP-PREDICT Score</h1>
+    <p>Pelvic organ prolapse recurrence risk calculator for preoperative counseling.<br>
+    Sullivan, Kim &amp; El Haraki &nbsp;·&nbsp; Atrium Health Wake Forest Baptist</p>
+  </div>
+
+  <!-- SURGICAL APPROACH -->
+  <div class="section-label">Surgical Approach</div>
+  <div class="factor-card">
+    <div class="factor-left">
+      <div class="factor-name">Surgery Type</div>
+      <div class="factor-hint">Planned or performed procedure</div>
+    </div>
+    <div class="factor-right">
+      <span class="pts-badge" id="badge-surg">1 pt</span>
+      <select class="factor-select" id="sel-surg" onchange="calc()">
+        <option value="0">Colpocleisis — 0 pts</option>
+        <option value="1" selected>Sacrocolpopexy — 1 pt</option>
+        <option value="2">Native Tissue Repair — 2 pts</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- BASELINE POP-Q -->
+  <div class="section-label">Baseline POP-Q Measurements</div>
+  <div class="factor-card">
+    <div class="factor-left">
+      <div class="factor-name">Ba Point — Anterior Vaginal Wall</div>
+      <div class="factor-hint">Most distal point of anterior wall; negative = above hymen</div>
+    </div>
+    <div class="factor-right">
+      <span class="pts-badge" id="badge-ba">0 pts</span>
+      <select class="factor-select" id="sel-ba" onchange="calc()">
+        <option value="0">&lt; 0 cm — 0 pts</option>
+        <option value="1">0 to 3 cm — 1 pt</option>
+        <option value="2">&ge; 4 cm — 2 pts</option>
+      </select>
+    </div>
+  </div>
+  <div class="factor-card">
+    <div class="factor-left">
+      <div class="factor-name">Genital Hiatus (gh)</div>
+      <div class="factor-hint">Measured at rest; distance from urethral meatus to posterior hymen</div>
+    </div>
+    <div class="factor-right">
+      <span class="pts-badge" id="badge-gh">1 pt</span>
+      <select class="factor-select" id="sel-gh" onchange="calc()">
+        <option value="0">&le; 3 cm — 0 pts</option>
+        <option value="1" selected>4 to 5 cm — 1 pt</option>
+        <option value="2">&ge; 6 cm — 2 pts</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- PATIENT CHARACTERISTICS -->
+  <div class="section-label">Patient Characteristics</div>
+  <div class="factor-card">
+    <div class="factor-left">
+      <div class="factor-name">Hormonal Status</div>
+      <div class="factor-hint">Includes vaginal estrogen and oral / systemic HRT as 0 pts</div>
+    </div>
+    <div class="factor-right">
+      <span class="pts-badge" id="badge-hrt">0 pts</span>
+      <select class="factor-select" id="sel-hrt" onchange="calc()">
+        <option value="0">Pre-menopausal or On Estrogen (systemic/local) — 0 pts</option>
+        <option value="1">Postmenopausal, No HRT — 1 pt</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- SCORE PANEL -->
+  <div class="score-section" id="score-section">
+    <div class="score-top">
+      <div class="score-num-block">
+        <span class="score-big" id="score-big">2</span>
+        <div class="score-denom">out of 7</div>
+      </div>
+      <div class="score-right">
+        <div class="risk-pct-large" id="risk-pct-large">17%</div>
+        <div class="risk-pct-label">estimated recurrence risk</div>
+        <div class="risk-ci" id="risk-ci">95% CI: 11–26%&nbsp; (n=89)</div>
+        <span class="risk-tier-badge" id="risk-tier-badge">Low Risk</span>
+      </div>
+    </div>
+
+    <div class="bar-track">
+      <div class="bar-fill" id="bar-fill" style="width:24%"></div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="breakdown">
+      <span class="bk-label">Surgery Type</span>            <span class="bk-val" id="bk-surg">1 pt</span>
+      <span class="bk-label">Ba Point (Anterior Wall)</span> <span class="bk-val" id="bk-ba">0 pts</span>
+      <span class="bk-label">Genital Hiatus</span>           <span class="bk-val" id="bk-gh">1 pt</span>
+      <span class="bk-label">Hormonal Status</span>          <span class="bk-val" id="bk-hrt">0 pts</span>
+      <div class="bk-divider"></div>
+      <span class="bk-total-label">Total Score</span>        <span class="bk-total-val" id="bk-total">2 / 7</span>
+    </div>
+  </div>
+
+  <!-- TIER CARDS -->
+  <div class="strata-grid">
+    <div class="strat" id="s0">
+      <div class="strat-name" style="color:var(--green-fg)">Low Risk</div>
+      <div class="strat-range" style="color:var(--green-fg)">8–17%</div>
+      <div class="strat-unit" style="color:var(--green-fg)">recurrence</div>
+    </div>
+    <div class="strat" id="s1">
+      <div class="strat-name" style="color:var(--yellow-fg)">Moderate Risk</div>
+      <div class="strat-range" style="color:var(--yellow-fg)">21–28%</div>
+      <div class="strat-unit" style="color:var(--yellow-fg)">recurrence</div>
+    </div>
+    <div class="strat" id="s2">
+      <div class="strat-name" style="color:var(--red-fg)">High Risk</div>
+      <div class="strat-range" style="color:var(--red-fg)">40–45%</div>
+      <div class="strat-unit" style="color:var(--red-fg)">recurrence</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Clinical Use:</strong> This score supports preoperative counseling and shared
+    decision-making. High-risk patients may benefit from more durable surgical approaches
+    (e.g., sacrocolpopexy over native tissue repair) or enhanced postoperative surveillance.
+    This tool does not replace clinical judgment.<br>
+    * Score 7 is based on only 8 patients in the derivation cohort; the confidence interval
+    is wide (53–98%) and this estimate should be interpreted with caution.<br>
+    Validated in 752 women across 4 prospective trials (ALTIS, BEST, EPACT, SASS);
+    AUC 0.67, cross-validation AUC 0.64.
+  </div>
+
+  <div class="footer">
+    Ba = most distal point of anterior vaginal wall &nbsp;·&nbsp;
+    gh = genital hiatus &nbsp;·&nbsp; HRT = hormone replacement therapy<br>
+    Composite recurrence: POP-Q Stage &ge;2, any POP-Q point &ge;0, or bothersome bulge symptoms<br>
+    Native tissue repair includes USLS (uterosacral ligament suspension)
+    and SSLF (sacrospinous ligament fixation)<br><br>
+    Sullivan M, Kim S, El Haraki A. POP-PREDICT Score.
+    Atrium Health Wake Forest Baptist, 2026.<br>
+    For research and educational use only.
+  </div>
+
+</div>
+
+<script>
+  // Per-score empirical data from derivation cohort (N=752)
+  const SCORE_DATA = {
+    0: { pct: null,  ci: null,     n: 0,   label: '—' },
+    1: { pct: 8,     ci: '2–25%',  n: 25,  label: '8%' },
+    2: { pct: 17,    ci: '11–26%', n: 89,  label: '17%' },
+    3: { pct: 21,    ci: '17–27%', n: 229, label: '21%' },
+    4: { pct: 28,    ci: '22–34%', n: 209, label: '28%' },
+    5: { pct: 40,    ci: '32–48%', n: 145, label: '40%' },
+    6: { pct: 45,    ci: '31–59%', n: 47,  label: '45%' },
+    7: { pct: 88,    ci: '53–98%', n: 8,   label: '88% *' },
+  };
+
+  const TIERS = [
+    { min:0, max:2, label:'Low Risk',      color:'#375623', bg:'#C6EFCE', border:'#375623',
+      badgeBg:'#C6EFCE', badgeColor:'#375623' },
+    { min:3, max:5, label:'Moderate Risk', color:'#7D4F00', bg:'#FFEB9C', border:'#7D4F00',
+      badgeBg:'#FFEB9C', badgeColor:'#7D4F00' },
+    { min:6, max:7, label:'High Risk',     color:'#9C0006', bg:'#FFC7CE', border:'#9C0006',
+      badgeBg:'#FFC7CE', badgeColor:'#9C0006' },
+  ];
+
+  function ptLabel(n) { return n === 1 ? '1 pt' : n + ' pts'; }
+
+  function tierFor(score) {
+    for (const t of TIERS) { if (score >= t.min && score <= t.max) return t; }
+    return TIERS[0];
+  }
+
+  function calc() {
+    const surg = parseInt(document.getElementById('sel-surg').value) || 0;
+    const ba   = parseInt(document.getElementById('sel-ba').value)   || 0;
+    const gh   = parseInt(document.getElementById('sel-gh').value)   || 0;
+    const hrt  = parseInt(document.getElementById('sel-hrt').value)  || 0;
+    const total = surg + ba + gh + hrt;
+
+    // Point badges
+    document.getElementById('badge-surg').textContent = ptLabel(surg);
+    document.getElementById('badge-ba').textContent   = ptLabel(ba);
+    document.getElementById('badge-gh').textContent   = ptLabel(gh);
+    document.getElementById('badge-hrt').textContent  = ptLabel(hrt);
+
+    // Breakdown
+    document.getElementById('bk-surg').textContent  = ptLabel(surg);
+    document.getElementById('bk-ba').textContent    = ptLabel(ba);
+    document.getElementById('bk-gh').textContent    = ptLabel(gh);
+    document.getElementById('bk-hrt').textContent   = ptLabel(hrt);
+    document.getElementById('bk-total').textContent = total + ' / 7';
+
+    // Score display
+    document.getElementById('score-big').textContent = total;
+    document.getElementById('bar-fill').style.width  =
+        Math.round((total / 7) * 100) + '%';
+
+    // Per-score risk
+    const d    = SCORE_DATA[total] || SCORE_DATA[1];
+    const tier = tierFor(total);
+
+    document.getElementById('risk-pct-large').textContent =
+        d.pct !== null ? d.label : '—';
+    document.getElementById('risk-pct-large').style.color = tier.color;
+    document.getElementById('risk-ci').textContent =
+        d.ci ? '95% CI: ' + d.ci + '\u00a0 (n=' + d.n + ')' : 'Not observed in cohort';
+    document.getElementById('bar-fill').style.background  = tier.color;
+    document.getElementById('score-big').style.color      = tier.color;
+    document.getElementById('score-section').style.borderColor = tier.border;
+
+    // Tier badge
+    const badge = document.getElementById('risk-tier-badge');
+    badge.textContent        = tier.label;
+    badge.style.background   = tier.badgeBg;
+    badge.style.color        = tier.badgeColor;
+    badge.style.border       = '1.5px solid ' + tier.color;
+
+    // Highlight active tier card
+    ['s0','s1','s2'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      const t  = TIERS[i];
+      if (t === tier) {
+        el.style.background  = t.bg;
+        el.style.borderColor = t.border;
+        el.classList.add('active');
+      } else {
+        el.style.background  = '';
+        el.style.borderColor = 'var(--gray-200)';
+        el.classList.remove('active');
+      }
+    });
+  }
+
+  calc();
+</script>
+</body>
+</html>

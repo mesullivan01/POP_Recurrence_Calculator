@@ -1,0 +1,125 @@
+======================================================================
+POP RECURRENCE MODEL RESULTS
+======================================================================
+
+Dataset: 752 patients, 210 recurrences (27.9%)
+Studies: {'ALTIS': 280, 'BEST': 60, 'EPACT': 216, 'SASS': 196}
+Candidate predictors: 18
+
+======================================================================
+MODEL 1: LASSO LOGISTIC REGRESSION
+======================================================================
+
+Selected features (non-zero coef, N=1):
+  bas_gh                          coef=+0.1292
+
+Selected C (1/lambda) via 1-SE rule: 0.0212  (CV AUC at this C: 0.635)
+
+Full-data performance:
+  AUC=0.634  Sens=0.567  Spec=0.655  PPV=0.389  NPV=0.796
+
+5-fold CV AUC: 0.639 ± 0.038  (folds: [0.593, 0.641, 0.704, 0.611, 0.646])
+
+LODO AUC:
+  Held-out ALTIS: AUC=0.674
+  Held-out BEST: AUC=0.732
+  Held-out EPACT: AUC=0.630
+  Held-out SASS: AUC=0.573
+
+======================================================================
+MODEL 2: STANDARD LOGISTIC REGRESSION (BACKWARD AIC)
+======================================================================
+
+Selected variables (N=5): ['bas_ba', 'bas_gh', 'hormonal_status', 'surg_native', 'surg_colpocleisis']
+
+Model summary:
+  AIC: 851.4    BIC: 879.1
+
+  Variable                            OR              95% CI         p
+  ------------------------------ -------  ------------------  --------
+  const                            0.101  (0.050 – 0.204)    0.0000 *
+  bas_ba                           1.126  (1.048 – 1.211)    0.0013 *
+  bas_gh                           1.308  (1.133 – 1.510)    0.0003 *
+  hormonal_status                  0.836  (0.666 – 1.050)    0.1242 
+  surg_native                      1.484  (1.036 – 2.127)    0.0316 *
+  surg_colpocleisis                0.366  (0.152 – 0.880)    0.0247 *
+
+Full-data performance:
+  AUC=0.665  Sens=0.662  Spec=0.603  PPV=0.393  NPV=0.822
+
+5-fold CV AUC: 0.640 ± 0.069  (folds: [0.519, 0.657, 0.729, 0.632, 0.666])
+  Held-out ALTIS: model fit failed, skipping
+
+LODO AUC:
+  Held-out BEST: AUC=0.659
+  Held-out EPACT: AUC=0.584
+  Held-out SASS: AUC=0.551
+
+======================================================================
+COMPARISON SUMMARY
+======================================================================
+
+Metric                              LASSO   Standard
+------------------------------ ---------- ----------
+Full-data AUC                       0.634      0.665
+Full-data Sensitivity               0.567      0.662
+Full-data Specificity               0.655      0.603
+5-fold CV AUC (mean)                0.639      0.640
+5-fold CV AUC (SD)                  0.038      0.069
+N predictors selected                   1          5
+LODO AUC range                 0.573–0.732
+                               0.551–0.659
+
+Variables in LASSO but not Standard: set()
+Variables in Standard but not LASSO:  {'bas_ba', 'surg_native', 'hormonal_status', 'surg_colpocleisis'}
+Variables in both:                     {'bas_gh'}
+
+======================================================================
+POINT SCORE DERIVATION (Standard Logistic Model)
+======================================================================
+
+β coefficients and raw point values (scale factor k=2.96):
+  Variable                              β  Meaningful unit            Raw pts
+  ------------------------------ --------  ------------------------- --------
+  surg_colpocleisis                -1.006  vs sacro                     -2.98
+  surg_native                       0.395  vs sacro                      1.17
+  bas_gh                            0.268  per 1.5 cm                    1.19
+  hormonal_status                  -0.179  binary (0/1 pts)             -0.53
+  bas_ba                            0.119  per 3 cm                      1.06
+
+Proposed point table:
+  Surgery type:
+    Colpocleisis                      0 pts
+    Sacrocolpopexy                    1 pt
+    Native tissue                     2 pts
+  Anterior wall, Ba (cm):
+    Ba < 0                            0 pts
+    Ba 0 – 3                          1 pt
+    Ba ≥ 4                            2 pts
+  Genital hiatus, gh (cm):
+    gh ≤ 3                            0 pts
+    gh 4 – 5                          1 pt
+    gh ≥ 6                            2 pts
+  Hormonal status:
+    Pre/peri-menopausal               0 pts
+    Postmenopausal, no HRT            1 pt
+    Postmenopausal, vaginal estrogen  0 pts
+    Postmenopausal, oral/systemic HRT 0 pts
+  Score range: 0 – 7 points
+
+Empirical recurrence by score (proposed tiers):
+  Score range        N   Events   Recurrence %
+  -------------- -----  -------  -------------
+  Low (0–2)         98       16          16.3%
+  Moderate (3–5)   599      166          27.7%
+  High (6–7)        55       28          50.9%
+
+Full score distribution:
+   Score      N   Events         %
+       1     12        1      8.3%
+       2     86       15     17.4%
+       3    240       50     20.8%
+       4    212       58     27.4%
+       5    147       58     39.5%
+       6     47       21     44.7%
+       7      8        7     87.5%

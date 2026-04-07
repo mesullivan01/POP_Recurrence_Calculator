@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(open:*)",
+      "Bash(pandoc --version)",
+      "Bash(pandoc /Users/mariesullivan/Documents/git/POP_Recurrence_Calculator/IUGA_abstract_POP_PREDICT.md -o /Users/mariesullivan/Documents/git/POP_Recurrence_Calculator/IUGA_abstract_POP_PREDICT.docx --reference-doc=default)",
+      "Bash(pandoc /Users/mariesullivan/Documents/git/POP_Recurrence_Calculator/IUGA_abstract_POP_PREDICT.md -o /Users/mariesullivan/Documents/git/POP_Recurrence_Calculator/IUGA_abstract_POP_PREDICT.docx)",
+      "Bash(pip3 install:*)"
+    ]
+  }
+}

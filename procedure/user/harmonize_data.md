@@ -1,16 +1,16 @@
 # Step 1 Harmonize Data
 
 ## Goals
-- MES to add overall project goals and the specific outcomes wanted to call "harmonizing data" a success
+•	Primary Objective: create a single data set through harmonization of 5 seperate studies that will be use to predict estimate of probability of recurrence following different surgical procedures (mesh versus native tissue versus colpocleisis). we will use popq variables collected in the data to see what variables led to recurrence of prolapse. for reference, when looking at popq measurements the negative numbers are less prolapse and positive numbers are more prolapse so 2>0>-2.  
+•	Secondary Objective: Identify demographic, surgical, and clinical factors most strongly associated with surgical success or failure. Likely variables included in data file under shi_variables.md however others might be identified. finding these outcomes will be the goal of harmonizing data 
 
 ## Data
-- MES to describe where the data are and their structure broadly so that Claude Code can review and understand the data
+- Data that you're harmonizing are 5 studies found in the data folder with two csv files for each study. there is a data dictionary file and data labels file for each study that are labeled accordingly. an overarching understanding of the data can be found in study_summaries.md and all studies have useful prolapse data except for ELOVE study which likely will be more helpful with demographic instead of surgical prolapse data as none of those patients had a prolapse surgery. i have predicted some variables that are some examples of variables of interest which can be found in shi_variables.md 
 
 ## Process
-- MES to evaluate the below procedure
-1. You should branch from main and create a branch called marie_data. This is where we'll do data processing. Review the protocol in data/protocol.md and understand our goal. There is one change: rather than NIH data we're using exclusively the Wake Forest data in the data/ directory.
+1. You should branch from main and create a branch called marie_data. This is where we'll do data processing. Review the protocol in data/protocol.md and understand our goal. There is one change: rather than NICHD data from PFDN we're using exclusively the Wake Forest data in the data/ directory from the PACT, BEST, ALTIS, LOVE, SASS trials.  
 2. Review data dictionaries and accompanying data files. You should have a great understanding of the data available and what they mean.
-3. Create a plan to harmonize the data to meet the goals in the protocol.md file. This means we'll want to identify patient characteristics and the natural course of prolapse across all data sets. This is the special sauce: in the next step (NOT NOW) we'll identify a model outlined in CLAUDE.md in order to create the point-based calculator.
-4. Begin harmonizing the data. There will be many times when you want to ask me questions. Ask them questions in the terminal, but record all of our decisions as part of procedure/claude/data_harmonizing_decisions.md. This should be reproducible.
+3. Create a plan to harmonize the data to meet the above goals and those covered in the protocol.md file. This means we'll want to identify patient characteristics and the natural course of prolapse if there is no surgical data available or prolapse before and after prolapse repair surgery across applicable data sets. This is the special sauce: in the next step (NOT NOW) we'll identify a model outlined in CLAUDE.md in order to create the point-based calculator.
+4. Begin harmonizing the data. There will be many times when you want to ask me questions since i have a clinical perspective and you do not. Ask the questions in the terminal, but record all of our decisions as part of procedure/claude/data_harmonizing_decisions.md. This should be reproducible.
 5. Once we have a plan together on how to do this, create a python file in the project root called harmonize_data.py that does the data harmonization. Pay close attention to the goal and data instructions stored in this markdown file.
 6. In procedure/claude/ create a summary of what we've done here as nd add it to data_harmonizing_decisions.md. I cannot stress enough how important this is, and that it should be very high quality. It will be submitted as record to an academic journal and will be used by you after clearing the context window. Again, spend significant time doing this.
