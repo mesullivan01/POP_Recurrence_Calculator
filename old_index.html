@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POP-PREDICT Score — Prolapse Recurrence Risk Calculator</title>
+  <style>
+    :root {
+      --teal-50: #E1F5EE;
+      --teal-100: #9FE1CB;
+      --teal-400: #1D9E75;
+      --teal-600: #0F6E56;
+      --amber-50: #FAEEDA;
+      --amber-400: #BA7517;
+      --coral-50: #FAECE7;
+      --coral-400: #D85A30;
+      --red-50: #FCEBEB;
+      --red-600: #A32D2D;
+      --gray-50: #F8F7F4;
+      --gray-100: #EDECE8;
+      --gray-200: #D3D1C7;
+      --gray-400: #888780;
+      --gray-600: #5F5E5A;
+      --gray-900: #2C2C2A;
+      --font: 'Georgia', serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--gray-50);
+      color: var(--gray-900);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+    }
+
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 2rem 1.5rem 1.5rem;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--gray-200);
+    }
+    .header-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--teal-600);
+      background: var(--teal-50);
+      border: 1px solid var(--teal-100);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 1rem;
+    }
+    .header h1 {
+      font-family: var(--font);
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: -0.5px;
+      color: var(--gray-900);
+      line-height: 1.2;
+      margin-bottom: 0.5rem;
+    }
+    .header p {
+      font-size: 14px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+
+    /* Section */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--gray-400);
+      margin: 1.5rem 0 0.6rem;
+      padding-left: 2px;
+    }
+
+    /* Factor rows */
+    .factor-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.15s;
+    }
+    .factor-card:hover { border-color: var(--teal-100); }
+    .factor-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--gray-900);
+    }
+    .factor-hint {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+    .factor-select {
+      font-size: 13px;
+      font-family: var(--font-sans);
+      color: var(--gray-900);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 6px 10px;
+      min-width: 195px;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+    }
+    .factor-select:focus {
+      outline: none;
+      border-color: var(--teal-400);
+    }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--gray-200); margin: 1.5rem 0; }
+
+    /* Score display */
+    .score-section {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      transition: border-color 0.35s;
+    }
+    .score-top {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .score-big {
+      font-size: 56px;
+      font-weight: 300;
+      font-family: var(--font);
+      line-height: 1;
+      transition: color 0.35s;
+      flex-shrink: 0;
+    }
+    .score-denom {
+      font-size: 20px;
+      color: var(--gray-400);
+    }
+    .score-right {}
+    .risk-label {
+      font-size: 22px;
+      font-weight: 600;
+      transition: color 0.35s;
+      line-height: 1.1;
+    }
+    .risk-pct {
+      font-size: 14px;
+      color: var(--gray-600);
+      margin-top: 4px;
+    }
+    .risk-range {
+      font-size: 12px;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    /* Bar */
+    .bar-track {
+      height: 10px;
+      background: var(--gray-100);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width 0.4s cubic-bezier(.4,0,.2,1), background 0.4s;
+    }
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+    }
+    .bar-label { font-size: 11px; color: var(--gray-400); }
+
+    /* Strata grid */
+    .strata-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 1.25rem;
+    }
+    .strat {
+      border: 1px solid var(--gray-200);
+      border-radius: 10px;
+      padding: 10px 12px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .strat.active { border-width: 2px; }
+    .strat-pts { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; }
+    .strat-name { font-size: 13px; font-weight: 600; }
+    .strat-pct { font-size: 12px; color: var(--gray-600); margin-top: 2px; }
+
+    /* Disclaimer */
+    .disclaimer {
+      margin-top: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: #FFFBF0;
+      border: 1px solid #FAC775;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #633806;
+      line-height: 1.6;
+    }
+    .disclaimer strong { font-weight: 600; }
+
+    /* Footer */
+    .footer {
+      margin-top: 1.25rem;
+      font-size: 11px;
+      color: var(--gray-400);
+      line-height: 1.7;
+      text-align: center;
+    }
+    .footer a { color: var(--teal-600); text-decoration: none; }
+
+    @media (max-width: 500px) {
+      .strata-grid { grid-template-columns: repeat(2, 1fr); }
+      .factor-card { flex-direction: column; align-items: flex-start; }
+      .factor-select { min-width: 100%; width: 100%; }
+      .score-big { font-size: 44px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-badge">Clinical Decision Tool</div>
+    <h1>POP-PREDICT Score</h1>
+    <p>Prolapse recurrence risk calculator incorporating surgical approach and patient characteristics.<br>Sullivan, Kim &amp; El Haraki · Atrium Health Wake Forest Baptist</p>
+  </div>
+
+  <div class="section-label">Surgical approach</div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Surgery type</div>
+      <div class="factor-hint">Planned or performed procedure</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">Colpocleisis — 0 pts</option>
+      <option value="1">Sacrocolpopexy — 1 pt</option>
+      <option value="2">USLS / SSLF — 2 pts</option>
+    </select>
+  </div>
+
+  <div class="section-label">Baseline POP-Q measurements</div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Ba point (anterior wall)</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">&lt; 0 cm — 0 pts</option>
+      <option value="1">0 to 2 cm — 1 pt</option>
+      <option value="2">3 to 4 cm — 2 pts</option>
+      <option value="3">&gt; 4 cm — 3 pts</option>
+    </select>
+  </div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">C point (apical)</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">&lt; &minus;4 cm — 0 pts</option>
+      <option value="1">&minus;4 to 0 cm — 1 pt</option>
+      <option value="2">&gt; 0 cm — 2 pts</option>
+    </select>
+  </div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Aa point (anterior)</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">&le; 0 cm — 0 pts</option>
+      <option value="1">&gt; 0 cm — 1 pt</option>
+    </select>
+  </div>
+
+  <div class="section-label">Patient characteristics</div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Parity</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">0–1 births — 0 pts</option>
+      <option value="1">2–3 births — 1 pt</option>
+      <option value="2">≥ 4 births — 2 pts</option>
+    </select>
+  </div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Height</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">&lt; 160 cm (&lt;5′3″) — 0 pts</option>
+      <option value="1">160–168 cm (5′3″–5′6″) — 1 pt</option>
+      <option value="2">&gt; 168 cm (&gt;5′6″) — 2 pts</option>
+    </select>
+  </div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Hormonal status</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">On HRT (any type) — 0 pts</option>
+      <option value="1">No HRT — 1 pt</option>
+    </select>
+  </div>
+  <div class="factor-card">
+    <div>
+      <div class="factor-name">Race</div>
+      <div class="factor-hint">Identified from LASSO selection</div>
+    </div>
+    <select class="factor-select" onchange="calc()">
+      <option value="0">Hispanic or other — 0 pts</option>
+      <option value="1">White or Black — 1 pt</option>
+    </select>
+  </div>
+
+  <div class="score-section" id="score-section">
+    <div class="score-top">
+      <div>
+        <span class="score-big" id="score-big">0</span>
+        <span class="score-denom"> / 14</span>
+      </div>
+      <div class="score-right">
+        <div class="risk-label" id="risk-label">Low risk</div>
+        <div class="risk-pct" id="risk-pct">~10% recurrence probability</div>
+        <div class="risk-range" id="risk-range">Score range: 0–4 points</div>
+      </div>
+    </div>
+
+    <div class="bar-track">
+      <div class="bar-fill" id="bar-fill" style="width:0%"></div>
+    </div>
+    <div class="bar-labels">
+      <span class="bar-label">0</span>
+      <span class="bar-label">7</span>
+      <span class="bar-label">14</span>
+    </div>
+
+    <div class="strata-grid">
+      <div class="strat" id="s0">
+        <div class="strat-pts">0–4 pts</div>
+        <div class="strat-name" style="color:#1D9E75">Low</div>
+        <div class="strat-pct">~10%</div>
+      </div>
+      <div class="strat" id="s1">
+        <div class="strat-pts">5–7 pts</div>
+        <div class="strat-name" style="color:#BA7517">Moderate</div>
+        <div class="strat-pct">~25%</div>
+      </div>
+      <div class="strat" id="s2">
+        <div class="strat-pts">8–10 pts</div>
+        <div class="strat-name" style="color:#D85A30">High</div>
+        <div class="strat-pct">~40%</div>
+      </div>
+      <div class="strat" id="s3">
+        <div class="strat-pts">11–14 pts</div>
+        <div class="strat-name" style="color:#A32D2D">Very high</div>
+        <div class="strat-pct">~55%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Clinical use:</strong> This score supports preoperative counseling and shared decision-making. 
+    High-risk patients may benefit from mesh-augmented repair or enhanced postoperative surveillance. 
+    This tool does not replace clinical judgment. Validated in 752 women across 4 prospective trials 
+    (ALTIS, BEST, EPACT, SASS); AUC 0.65 with LODO external validation.
+  </div>
+
+  <div class="footer">
+    USLS = uterosacral ligament suspension &nbsp;·&nbsp; SSLF = sacrospinous ligament fixation &nbsp;·&nbsp; HRT = hormone replacement therapy<br>
+    Composite recurrence: POP-Q stage ≥2, any POP-Q point ≥0, or bothersome bulge symptoms<br><br>
+    Sullivan M, Kim S, El Haraki A. POP-PREDICT Score. Atrium Health Wake Forest Baptist, 2025.<br>
+    For research and educational use only.
+  </div>
+
+</div>
+
+<script>
+  const strata = [
+    { min:0,  max:4,  label:'Low risk',       pct:'~10% recurrence probability', color:'#1D9E75', bg:'#E1F5EE', border:'#9FE1CB' },
+    { min:5,  max:7,  label:'Moderate risk',  pct:'~25% recurrence probability', color:'#BA7517', bg:'#FAEEDA', border:'#FAC775' },
+    { min:8,  max:10, label:'High risk',      pct:'~40% recurrence probability', color:'#D85A30', bg:'#FAECE7', border:'#F5C4B3' },
+    { min:11, max:14, label:'Very high risk', pct:'~55% recurrence probability', color:'#A32D2D', bg:'#FCEBEB', border:'#F7C1C1' }
+  ];
+
+  function calc() {
+    const selects = document.querySelectorAll('select');
+    let total = 0;
+    selects.forEach(s => total += parseInt(s.value));
+
+    const pct = Math.round((total / 14) * 100);
+    document.getElementById('bar-fill').style.width = pct + '%';
+
+    let tier = strata[0];
+    for (const s of strata) { if (total >= s.min) tier = s; }
+
+    document.getElementById('bar-fill').style.background = tier.color;
+    document.getElementById('score-big').textContent = total;
+    document.getElementById('score-big').style.color = tier.color;
+    document.getElementById('risk-label').textContent = tier.label;
+    document.getElementById('risk-label').style.color = tier.color;
+    document.getElementById('risk-pct').textContent = tier.pct;
+    document.getElementById('risk-range').textContent = 'Score range: ' + tier.min + '–' + tier.max + ' points';
+    document.getElementById('score-section').style.borderColor = tier.border;
+
+    ['s0','s1','s2','s3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (strata[i] === tier) {
+        el.style.background = strata[i].bg;
+        el.style.borderColor = strata[i].color;
+        el.style.borderWidth = '2px';
+      } else {
+        el.style.background = '';
+        el.style.borderColor = '';
+        el.style.borderWidth = '';
+      }
+    });
+  }
+
+  calc();
+</script>
+</body>
+</html>

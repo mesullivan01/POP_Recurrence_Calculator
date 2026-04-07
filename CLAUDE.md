@@ -17,10 +17,10 @@ This session is an **independent replication** of existing work. The objective i
 3. Derive a point-based risk score from the model
 4. Implement the score as a standalone HTML calculator
 
-The existing calculator (`index.html`) and its methodology (`IUGA_abstract_POP_PREDICT.md`) are preserved as a reference to compare against at the end. Do not treat them as the ground truth during development — the replication should reach its own conclusions first.
+The original calculator (`old_index.html`) and its methodology (`IUGA_abstract_POP_PREDICT.md`) are preserved as a reference. Do not treat them as the ground truth — the replication should reach its own conclusions first.
 
 ### Existing Work (for final comparison)
-The POP-PREDICT Score is a single-file clinical decision-support tool (`index.html`) for estimating pelvic organ prolapse (POP) recurrence risk after surgical repair. It was developed from LASSO logistic regression on 752 women across 4 prospective trials (ALTIS, BEST, EPACT, SASS), achieving AUC 0.65.
+The original POP-PREDICT Score (`old_index.html`) was developed from LASSO logistic regression on 752 women across 4 prospective trials (ALTIS, BEST, EPACT, SASS), achieving AUC 0.65. The current live calculator is `index.html`.
 
 ## Running the App
 
@@ -34,30 +34,28 @@ python3 -m http.server 8000
 
 ## Architecture
 
-Everything lives in `index.html`:
-- **CSS** (`:root` design tokens → component styles): teal/amber/coral/red color scheme maps directly to Low/Moderate/High/Very High risk tiers
-- **HTML**: 8 `<select>` dropdowns (one per predictor), each calling `calc()` on change
-- **JavaScript** (`calc()` function): sums all `select.value` integers → looks up the matching stratum → updates DOM (score display, progress bar, active stratum card, border colors)
+Everything lives in `index.html` (the current calculator, formerly `calculator.html`):
+- **HTML**: 4 `<select>` dropdowns (Surgery, Ba point, Genital Hiatus, Hormonal Status), each calling `calc()` on change
+- **JavaScript** (`calc()` function): sums dropdown values → looks up per-score `SCORE_DATA` → updates score display, risk %, CI, tier badge, and breakdown panel
+- **TIERS**: 3 risk bands (Low 0–2, Moderate 3–4, High 5–7) rendered as colored cards
 
 ## Scoring Logic
 
-Total score = sum of all 8 dropdown values (max 14 pts):
+Total score = sum of 4 dropdown values (max 7 pts):
 
 | Predictor | Max pts |
 |---|---|
-| Surgery type (Colpocleisis=0, Sacrocolpopexy=1, USLS/SSLF=2) | 2 |
-| Ba point (anterior wall) | 3 |
-| C point (apical) | 2 |
-| Aa point (anterior) | 1 |
-| Parity | 2 |
-| Height | 2 |
+| Surgery type (Colpocleisis=0, Sacrocolpopexy=1, Native tissue=2) | 2 |
+| Ba point (anterior wall) | 2 |
+| Genital Hiatus | 2 |
 | Hormonal status | 1 |
-| Race | 1 |
 
-Risk strata: 0–4 pts (~10%), 5–7 (~25%), 8–10 (~40%), 11–14 (~55%)
+Per-score recurrence: score 1→8%, 2→17%, 3→21%, 4→28%, 5→40%, 6→45%, 7→88%*  
+Risk bands: Low 0–2 (8–17%), Moderate 3–4 (21–28%), High 5–7 (40–45%)
 
 ## Key Files
 
-- `index.html` — the entire application
+- `index.html` — the live calculator (deployed via GitHub Pages)
+- `old_index.html` — original LASSO-derived 8-predictor calculator (preserved for reference)
 - `README.md` — scoring table and GitHub Pages deployment instructions
-- `IUGA_abstract_POP_PREDICT.md` — underlying research abstract with model performance details and patient cohort data
+- `IUGA_abstract_POP_PREDICT.md` — research abstracts (IUGA original + new model)
