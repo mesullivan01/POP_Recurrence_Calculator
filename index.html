@@ -269,6 +269,64 @@
       .strata-grid { grid-template-columns: 1fr; }
     }
 
+    /* ---- Colpocleisis panel ---- */
+    .colpo-panel {
+      background: white;
+      border: 2px solid var(--green-fg);
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .colpo-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--green-fg);
+      background: var(--green-bg);
+      border: 1px solid var(--green-fg);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 1rem;
+    }
+    .colpo-pct {
+      font-size: 64px;
+      font-weight: 300;
+      font-family: var(--font);
+      color: var(--green-fg);
+      line-height: 1;
+    }
+    .colpo-pct-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--green-fg);
+      margin-top: 4px;
+      margin-bottom: 1.1rem;
+    }
+    .colpo-body {
+      font-size: 13.5px;
+      color: var(--gray-600);
+      line-height: 1.65;
+      max-width: 480px;
+      margin: 0 auto 0.9rem;
+    }
+    .colpo-note {
+      font-size: 12px;
+      color: var(--gray-400);
+      font-style: italic;
+      border-top: 1px solid var(--gray-200);
+      padding-top: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .inputs-dimmed {
+      opacity: 0.35;
+      pointer-events: none;
+      user-select: none;
+    }
+
     /* ---- Disclaimer ---- */
     .disclaimer {
       margin-top: 1.5rem;
@@ -322,7 +380,7 @@
     <div class="factor-right">
       <span class="pts-badge" id="badge-surg">1 pt</span>
       <select class="factor-select" id="sel-surg" onchange="calc()">
-        <option value="0">Colpocleisis — 0 pts</option>
+        <option value="colpo">Colpocleisis — 0 pts</option>
         <option value="1" selected>Sacrocolpopexy — 1 pt</option>
         <option value="2">Native Tissue Repair — 2 pts</option>
       </select>
@@ -331,7 +389,7 @@
 
   <!-- BASELINE POP-Q -->
   <div class="section-label">Baseline POP-Q Measurements</div>
-  <div class="factor-card">
+  <div class="factor-card" id="card-ba">
     <div class="factor-left">
       <div class="factor-name">Ba Point — Anterior Vaginal Wall</div>
       <div class="factor-hint">Most distal point of anterior wall; negative = above hymen</div>
@@ -345,7 +403,7 @@
       </select>
     </div>
   </div>
-  <div class="factor-card">
+  <div class="factor-card" id="card-gh">
     <div class="factor-left">
       <div class="factor-name">Genital Hiatus (gh)</div>
       <div class="factor-hint">Measured at rest; distance from urethral meatus to posterior hymen</div>
@@ -362,7 +420,7 @@
 
   <!-- PATIENT CHARACTERISTICS -->
   <div class="section-label">Patient Characteristics</div>
-  <div class="factor-card">
+  <div class="factor-card" id="card-hrt">
     <div class="factor-left">
       <div class="factor-name">Hormonal Status</div>
       <div class="factor-hint">Includes vaginal estrogen and oral / systemic HRT as 0 pts</div>
@@ -403,6 +461,24 @@
       <span class="bk-label">Hormonal Status</span>          <span class="bk-val" id="bk-hrt">0 pts</span>
       <div class="bk-divider"></div>
       <span class="bk-total-label">Total Score</span>        <span class="bk-total-val" id="bk-total">2 / 7</span>
+    </div>
+  </div>
+
+  <!-- COLPOCLEISIS PANEL (shown instead of score when colpocleisis selected) -->
+  <div class="colpo-panel" id="colpo-panel" style="display:none">
+    <div class="colpo-badge">Obliterative Procedure</div>
+    <div class="colpo-pct">&lt;5%</div>
+    <div class="colpo-pct-label">expected recurrence</div>
+    <div class="colpo-body">
+      Colpocleisis carries a recurrence rate below 5% in published literature —
+      substantially lower than any reconstructive approach. Because this procedure
+      eliminates rather than repairs the prolapsed anatomy, the POP-PREDICT scoring
+      model does not apply. Standard risk factors such as Ba point and genital hiatus
+      are not predictive of recurrence after obliterative repair.
+    </div>
+    <div class="colpo-note">
+      Patient counseling should address the permanent, non-reversible nature of this
+      procedure and the requirement to forgo vaginal intercourse postoperatively.
     </div>
   </div>
 
@@ -479,10 +555,35 @@
   }
 
   function calc() {
-    const surg = parseInt(document.getElementById('sel-surg').value) || 0;
-    const ba   = parseInt(document.getElementById('sel-ba').value)   || 0;
-    const gh   = parseInt(document.getElementById('sel-gh').value)   || 0;
-    const hrt  = parseInt(document.getElementById('sel-hrt').value)  || 0;
+    const surgVal = document.getElementById('sel-surg').value;
+    const isColpo = surgVal === 'colpo';
+
+    // Dim / undim the non-surgery inputs
+    ['card-ba', 'card-gh', 'card-hrt'].forEach(id => {
+      document.getElementById(id).classList.toggle('inputs-dimmed', isColpo);
+    });
+
+    // Toggle between colpocleisis panel and normal score display
+    const scoreSection = document.getElementById('score-section');
+    const colpoPanel   = document.getElementById('colpo-panel');
+    const strataGrid   = document.querySelector('.strata-grid');
+
+    if (isColpo) {
+      document.getElementById('badge-surg').textContent = '0 pts';
+      scoreSection.style.display = 'none';
+      strataGrid.style.display   = 'none';
+      colpoPanel.style.display   = '';
+      return;
+    }
+
+    scoreSection.style.display = '';
+    strataGrid.style.display   = '';
+    colpoPanel.style.display   = 'none';
+
+    const surg  = parseInt(surgVal) || 0;
+    const ba    = parseInt(document.getElementById('sel-ba').value)  || 0;
+    const gh    = parseInt(document.getElementById('sel-gh').value)  || 0;
+    const hrt   = parseInt(document.getElementById('sel-hrt').value) || 0;
     const total = surg + ba + gh + hrt;
 
     // Point badges
@@ -512,16 +613,16 @@
     document.getElementById('risk-pct-large').style.color = tier.color;
     document.getElementById('risk-ci').textContent =
         d.ci ? '95% CI: ' + d.ci + '\u00a0 (n=' + d.n + ')' : 'Not observed in cohort';
-    document.getElementById('bar-fill').style.background  = tier.color;
-    document.getElementById('score-big').style.color      = tier.color;
+    document.getElementById('bar-fill').style.background       = tier.color;
+    document.getElementById('score-big').style.color           = tier.color;
     document.getElementById('score-section').style.borderColor = tier.border;
 
     // Tier badge
     const badge = document.getElementById('risk-tier-badge');
-    badge.textContent        = tier.label;
-    badge.style.background   = tier.badgeBg;
-    badge.style.color        = tier.badgeColor;
-    badge.style.border       = '1.5px solid ' + tier.color;
+    badge.textContent      = tier.label;
+    badge.style.background = tier.badgeBg;
+    badge.style.color      = tier.badgeColor;
+    badge.style.border     = '1.5px solid ' + tier.color;
 
     // Highlight active tier card
     ['s0','s1','s2'].forEach((id, i) => {
