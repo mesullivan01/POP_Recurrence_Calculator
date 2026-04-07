@@ -209,3 +209,6 @@ __marimo__/
 # Local data files (ignore contents; exception for IRB protocol transcript)
 data/*
 !data/protocol.md
+
+# Microsoft Office lock files (opened document temp files)
+~$*
